@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cindy女王專屬集點卡</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+        body { margin: 0; background-color: #f8f9fa; color: #333; padding-bottom: 50px; }
+
+        .header-card { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white; padding: 40px 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center; position: relative; 
+        }
+        .header-content { position: relative; z-index: 1; }
+
+        .action-area { display: flex; justify-content: center; gap: 8px; margin-top: 15px; }
+        .action-input { width: 80px; padding: 10px; border-radius: 8px; border: none; text-align: center; font-size: 1rem; outline: none; }
+        .btn-add { background-color: #e1b12c; color: #111; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-minus { background-color: rgba(255,255,255,0.3); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        .tabs { display: flex; justify-content: space-around; margin: 15px; background: #eee; border-radius: 12px; padding: 5px; gap: 5px; }
+        .tab-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #666; background: transparent; font-size: 0.85rem; }
+        .tab-btn.active { background: white; color: #1a1a2e; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .tab-content { display: none; padding: 0 20px; }
+        .tab-content.active { display: block; }
+
+        .info-card { background: white; padding: 25px 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .info-title { display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; font-weight: bold; color: #1a1a2e; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
+        .point-tag { background: #fff9e6; color: #b8860b; padding: 3px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; border: 1px solid #ffeeba; white-space: nowrap; }
+        .note-text { font-size: 0.8rem; color: #888; margin-top: 4px; display: block; }
+
+        .privilege-item { margin-bottom: 20px; }
+        .header-row { display: flex; align-items: center; margin-bottom: 5px; }
+        .star { color: #e1b12c; margin-right: 8px; font-size: 1.1rem; }
+        .title-label { font-weight: bold; color: #1a1a2e; font-size: 0.95rem; }
+        .content-desc { color: #666; font-size: 0.85rem; padding-left: 24px; line-height: 1.5; }
+
+        .level-card { border: 2px solid transparent; margin-bottom: 15px; padding: 20px; border-radius: 15px; transition: all 0.3s ease; }
+        .level-black { border-color: #444; background: #1a1a1a; color: #ddd; }
+        .level-crown { border-color: #e1b12c; background: #fffdf5; color: #333; }
+        .lock-status { font-size: 0.85rem; font-weight: normal; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,0.1); }
+        .status-locked { color: #ff7675; }
+        .status-unlocked { color: #4cd137; background: rgba(76, 209, 55, 0.1); }
+        .card-locked { opacity: 0.5; filter: grayscale(50%); }
+
+        .reward-item { background: white; border-radius: 15px; padding: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .redeem-btn { background: #1a1a2e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; width: 85%; max-width: 320px; padding: 30px; border-radius: 20px; text-align: center; position: relative; }
+        
+        /* 升級慶祝動畫特效 */
+        @keyframes tada {
+            0% { transform: scale3d(1, 1, 1); }
+            10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); }
+            30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); }
+            40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); }
+            100% { transform: scale3d(1, 1, 1); }
+        }
+        .animate-tada { animation: tada 1s ease-in-out; }
+        .level-up-title { color: #e1b12c; font-size: 1.5rem; font-weight: bold; margin: 10px 0; text-shadow: 0 2px 4px rgba(225, 177, 44, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="header-card">
+        <div class="header-content">
+            <div style="letter-spacing: 3px; font-weight: bold; color: #e1b12c; font-size: 1.2rem;">Cindy女王專屬集點卡</div>
+            <div id="pointsDisplay" style="margin: 15px 0;"></div>
+            <div class="action-area">
+                <input type="number" id="pointInput" class="action-input" placeholder="點數" min="1">
+                <button class="btn-add" onclick="modifyPoints('add')">加點</button>
+                <button class="btn-minus" onclick="modifyPoints('minus')">扣除</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn" onclick="switchTab(event, 'tab-privilege')">權益</button>
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-how-to')">集點</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-level')">等級</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-rewards')">兌換</button>
+    </div>
+
+    <div id="tab-privilege" class="tab-content">
+        <div class="info-card">
+            <div class="info-title">💎 會員基本持權 (不扣點)</div>
+            <div class="privilege-item"><div class="header-row"><span class="star">✦</span><span class="title-label">物理親密權</span></div><div class="content-desc">親親、抱抱、牽手。這是妳的「呼吸權」。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">✦</span><span class="title-label">首席攝影官</span></div><div class="content-desc">專屬攝影師，捕捉妳閃閃發光的瞬間。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">✦</span><span class="title-label">人工智慧導航</span></div><div class="content-desc">妳負責漂亮，我負責認路。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">✦</span><span class="title-label">全天候情緒保鏢</span></div><div class="content-desc">接住所有情緒，給予最高等級讚美。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">✦</span><span class="title-label">私人秘書服務</span></div><div class="content-desc">美食、訂位、安排行程細節。</div></div>
+        </div>
+    </div>
+
+    <div id="tab-how-to" class="tab-content active">
+        <div class="info-card">
+            <div class="info-title"><span>✨ 基礎累積 (1 pt)</span></div>
+            <div class="list-item"><span>✦ 抱抱 / 牽手 / 親親</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 找好吃的/去玩</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 每日早晚安與愛你</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 每日喝水 3 瓶</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 健身運動 / 報備</span><span class="point-tag">1 pt</span></div>
+            
+            <div class="info-title" style="margin-top:30px;"><span>🌅 浪漫加成</span></div>
+            <div class="list-item"><span>✦ 夕陽/海邊/夜景約會</span><span class="point-tag">2 pt</span></div>
+            <div class="list-item"><span>✦ 偷偷準備驚喜給 Ray</span><span class="point-tag">3 pt</span></div>
+            <div class="list-item">
+                <div>
+                    <span>✦ 快樂的大戰一場</span>
+                    <span class="note-text">(可根據地點與內容，Ray 將給予額外點數)</span>
+                </div>
+                <span class="point-tag">5 pt</span>
+            </div>
+            
+            <div class="info-title" style="margin-top:30px;"><span>💖 心靈與驚喜</span></div>
+            <div class="list-item"><span>✦ 【今日小確幸】分享小事</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 【勇氣獎勵】坦白心情</span><span class="point-tag">3 pt</span></div>
+        </div>
+    </div>
+
+    <div id="tab-level" class="tab-content">
+        <div id="level-500" class="info-card level-card level-black card-locked">
+            <div class="info-title" style="color: white; border-bottom: none; margin-bottom: 5px;">
+                <span>🖤 黑鑽會員</span>
+                <span class="lock-status status-locked" id="status-500">🔒 需 500pt</span>
+            </div>
+            <div style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7; color: #bbb;">解鎖條件：累積達 500 點「無聲的共鳴」</div>
+            <div class="list-item" style="border-bottom: 1px solid #444;"><span style="color: white;">✦ 免死金牌 (每月一次)</span></div>
+            <div class="list-item" style="border-bottom: none;"><span style="color: #888;">✦ 其餘敬請期待...</span></div>
+        </div>
+
+        <div id="level-1000" class="info-card level-card level-crown card-locked"> 
+            <div class="info-title" style="border-bottom: none; margin-bottom: 5px;">
+                <span>👑 皇冠會員</span>
+                <span class="lock-status status-locked" id="status-1000">🔒 需 1000pt</span>
+            </div>
+            <div style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7; color: #888;">解鎖條件：累積達 1000 點「終極的專屬感」</div>
+            <div class="list-item"><span>✦ 私人造型訂製權</span></div>
+            <div class="list-item"><span>✦ 免死金牌 (每月二次)</span></div>
+            <div class="list-item"><span>✦ 時空停滯地圖</span></div>
+            <div class="list-item" style="border-bottom: none;"><span style="color: #bbb;">✦ 其餘敬請期待...</span></div>
+        </div>
+    </div>
+
+    <div id="tab-rewards" class="tab-content">
+        <div id="rewardsList"></div>
+    </div>
+
+    <div class="modal-overlay" id="rewardModal">
+        <div class="modal-content">
+            <div id="modalIcon" style="font-size:3rem;">✨</div>
+            <h3 id="modalTitle">系統通知</h3>
+            <button class="redeem-btn" style="width:100%; margin-top: 15px;" onclick="document.getElementById('rewardModal').style.display='none'">確認</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="levelUpModal">
+        <div class="modal-content animate-tada" style="border: 2px solid #e1b12c;">
+            <div style="font-size:3.5rem;">🎉</div>
+            <div class="level-up-title">LEVEL UP!</div>
+            <h3 style="margin: 5px 0 15px 0;">恭喜解鎖新特權</h3>
+            <p id="levelUpDesc" style="color:#666; font-size:0.95rem; line-height:1.5;"></p>
+            <button class="btn-add" style="width:100%; margin-top: 15px;" onclick="closeLevelUpModal()">太棒了！去看看</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL ="https://script.google.com/macros/s/AKfycbybxByPZnTGwj1iQUWNQWNDABmc6LOKPbeGn2QgM_5g_GqdZlEo1lmZ_MPi4VC3wuxu/exec";
+
+        const rewards = [
+            { points: 15, title: "美食/下午茶外送服務", desc: "好吃的抹茶系列或精緻下午茶到樓下喔" },
+            { points: 15, title: "坦然心事分享大會", desc: "一起批鬥最近的不愉快" },
+            { points: 20, title: "專屬美照攝影會", desc: "Ray 負責拍出 5 張奇蹟美照" },
+            { points: 30, title: "全身按摩", desc: "不限時間、不限地點" },
+            { points: 50, title: "一日「Yes Man」之夜", desc: "Ray 完全聽命於女王" },
+            { points: 300, title: "夢幻清單旅行", desc: "解鎖夏威夷/韓國/紐西蘭大願望" }
+        ];
+
+        let currentPoints = 0;
+        let totalAccumulatedPoints = 0;
+        let isSyncing = false; // 用來防止網路延遲時重複按
+
+        // 畫面剛載入時，顯示同步中
+        document.getElementById('pointsDisplay').innerHTML = `
+            <div style="font-size: 1.1rem; color: #e1b12c; margin: 25px 0; font-weight: bold;">
+                🔄 正在與雲端伺服器同步資料...
+            </div>
+        `;
+
+        // 🚀 從 Google 雲端讀取資料
+        async function loadData() {
+            try {
+                // 拿掉會觸發 CORS 封鎖的 headers，保持最簡單的 fetch
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    redirect: 'follow' 
+                });
+                
+                const data = await response.json();
+                currentPoints = data.currentPoints;
+                totalAccumulatedPoints = data.totalPoints;
+                updateDisplay();
+            } catch (error) {
+                console.error("抓取失敗：", error);
+                document.getElementById('pointsDisplay').innerHTML = `<div style="color: #ff7675; margin: 20px 0;">連線讀取失敗</div>`;
+            }
+        }
+
+       // 🚀 存檔到 Google 雲端
+        async function saveData(oldTotal, action) {
+            isSyncing = true;
+            document.getElementById('pointsDisplay').style.opacity = '0.5'; 
+
+            try {
+                // 【關鍵修正】: 把 /save 拿掉，改成 ?action=save 才能對應後端的 e.parameter.action === 'save'
+                const saveUrl = `${API_URL}?action=save&current=${currentPoints}&total=${totalAccumulatedPoints}`;
+                
+                // 加上 redirect: 'follow' 確保存檔後能正確收到回傳的 success
+                await fetch(saveUrl, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+
+                updateDisplay();
+                document.getElementById('pointsDisplay').style.opacity = '1';
+                isSyncing = false;
+
+                // 只有加點且剛剛好跨越門檻時觸發動畫
+                if (action === 'add') {
+                    if (oldTotal < 500 && totalAccumulatedPoints >= 500) {
+                        triggerLevelUp("🖤 黑鑽會員", "妳已成功累積 500 點無聲的共鳴！<br>正式獲得【免死金牌】特權！");
+                    } else if (oldTotal < 1000 && totalAccumulatedPoints >= 1000) {
+                        triggerLevelUp("👑 皇冠會員", "太神啦！累積突破 1000 點！<br>妳現在是擁有終極專屬感的皇冠女王！");
+                    }
+                }
+            } catch (error) {
+                console.error("存檔錯誤詳情:", error);
+                alert("存檔失敗！請檢查網路連線。");
+                isSyncing = false;
+                document.getElementById('pointsDisplay').style.opacity = '1';
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('pointsDisplay').innerHTML = `
+                <div style="font-size: 0.9rem; opacity: 0.8;">目前可用點數</div>
+                <div style="font-size: 3.5rem; font-weight: bold; color: #fff;">${currentPoints}</div>
+                <div style="font-size: 0.85rem; opacity: 0.6; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 5px; display: inline-block;">
+                    總累積進度：${totalAccumulatedPoints} pt
+                </div>
+            `;
+
+            const level500 = document.getElementById('level-500');
+            const status500 = document.getElementById('status-500');
+            if (totalAccumulatedPoints >= 500) {
+                level500.classList.remove('card-locked');
+                status500.className = 'lock-status status-unlocked';
+                status500.innerText = '✅ 已解鎖';
+            } else {
+                level500.classList.add('card-locked');
+                status500.className = 'lock-status status-locked';
+                status500.innerText = `🔒 需 500pt (差 ${500 - totalAccumulatedPoints}pt)`;
+            }
+
+            const level1000 = document.getElementById('level-1000');
+            const status1000 = document.getElementById('status-1000');
+            if (totalAccumulatedPoints >= 1000) {
+                level1000.classList.remove('card-locked');
+                status1000.className = 'lock-status status-unlocked';
+                status1000.innerText = '✅ 已解鎖';
+            } else {
+                level1000.classList.add('card-locked');
+                status1000.className = 'lock-status status-locked';
+                status1000.innerText = `🔒 需 1000pt (差 ${1000 - totalAccumulatedPoints}pt)`;
+            }
+        }
+
+        async function modifyPoints(action) {
+            if (isSyncing) return; 
+            const inputField = document.getElementById('pointInput');
+            const val = parseInt(inputField.value);
+
+            if (val === 999) {
+                let adminVal = parseInt(prompt("【管理員模式】輸入新的累積總點數："));
+                if(!isNaN(adminVal)){
+                    totalAccumulatedPoints = adminVal;
+                    await saveData(totalAccumulatedPoints, 'admin');
+                }
+                inputField.value = ''; return;
+            }
+            if(isNaN(val) || val <= 0) return;
+
+            let oldTotal = totalAccumulatedPoints; 
+
+            if(action === 'add') { 
+                currentPoints += val; 
+                totalAccumulatedPoints += val; 
+            } else { 
+                currentPoints = Math.max(0, currentPoints - val); 
+            }
+
+            inputField.value = '';
+            await saveData(oldTotal, action); // 呼叫存檔
+        }
+
+        function triggerLevelUp(levelName, descHtml) {
+            document.getElementById('levelUpDesc').innerHTML = `晉升為 <b>${levelName}</b><br><br>${descHtml}`;
+            document.getElementById('levelUpModal').style.display = 'flex';
+            const modalContent = document.querySelector('#levelUpModal .modal-content');
+            modalContent.classList.remove('animate-tada');
+            void modalContent.offsetWidth;
+            modalContent.classList.add('animate-tada');
+        }
+
+        function closeLevelUpModal() {
+            document.getElementById('levelUpModal').style.display = 'none';
+            document.querySelector('.tab-btn:nth-child(3)').click();
+        }
+
+        function switchTab(evt, tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            if(evt) evt.currentTarget.classList.add('active');
+        }
+
+        function renderRewards() {
+            const list = document.getElementById('rewardsList');
+            list.innerHTML = '';
+            rewards.forEach(r => {
+                list.innerHTML += `
+                <div class="reward-item">
+                    <div style="flex: 1;">
+                        <div style="font-weight:bold;">${r.title}</div>
+                        <div style="font-size:0.8rem; color:#666;">${r.desc}</div>
+                    </div>
+                    <button class="redeem-btn" onclick="redeem('${r.title}', ${r.points})">${r.points} pt</button>
+                </div>`;
+            });
+        }
+
+        async function redeem(title, points) {
+            if(isSyncing) return;
+            if(currentPoints >= points) {
+                currentPoints -= points;
+                await saveData(totalAccumulatedPoints, 'redeem'); // 兌換也要存檔
+                document.getElementById('modalTitle').innerText = "兌換成功！";
+                document.getElementById('modalIcon').innerText = "🎉";
+            } else {
+                document.getElementById('modalTitle').innerText = "點數不足";
+                document.getElementById('modalIcon').innerText = "🥺";
+            }
+            document.getElementById('rewardModal').style.display = 'flex';
+        }
+
+        // 網頁啟動時，第一件事就是去抓雲端資料！
+        renderRewards();
+        loadData();
+    </script>
+</body>
+</html>
