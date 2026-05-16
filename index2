@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cindy女王專屬集點卡</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+        body { margin: 0; background-color: #f8f9fa; color: #333; padding-bottom: 50px; }
+
+        .header-card { 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white; padding: 40px 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center; position: relative; 
+        }
+        .header-content { position: relative; z-index: 1; }
+
+        .action-area { display: flex; justify-content: center; gap: 8px; margin-top: 15px; }
+        .action-input { width: 80px; padding: 10px; border-radius: 8px; border: none; text-align: center; font-size: 1rem; outline: none; }
+        .btn-add { background-color: #e1b12c; color: #111; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-minus { background-color: rgba(255,255,255,0.3); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        .tabs { display: flex; justify-content: space-around; margin: 15px; background: #eee; border-radius: 12px; padding: 5px; gap: 5px; }
+        .tab-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #666; background: transparent; font-size: 0.85rem; }
+        .tab-btn.active { background: white; color: #1a1a2e; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .tab-content { display: none; padding: 0 20px; }
+        .tab-content.active { display: block; }
+
+        .info-card { background: white; padding: 25px 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .info-title { display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; font-weight: bold; color: #1a1a2e; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
+        .point-tag { background: #fff9e6; color: #b8860b; padding: 3px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; border: 1px solid #ffeeba; white-space: nowrap; }
+        .note-text { font-size: 0.8rem; color: #888; margin-top: 4px; display: block; }
+
+        .privilege-item { margin-bottom: 20px; }
+        .header-row { display: flex; align-items: center; margin-bottom: 5px; }
+        .star { color: #e1b12c; margin-right: 8px; font-size: 1.1rem; }
+        .title-label { font-weight: bold; color: #1a1a2e; font-size: 0.95rem; }
+        .content-desc { color: #666; font-size: 0.85rem; padding-left: 24px; line-height: 1.5; }
+
+        .level-card { border: 2px solid transparent; margin-bottom: 15px; padding: 20px; border-radius: 15px; transition: all 0.3s ease; }
+        .level-black { border-color: #444; background: #1a1a1a; color: #ddd; }
+        .level-crown { border-color: #e1b12c; background: #fffdf5; color: #333; }
+        .lock-status { font-size: 0.85rem; font-weight: normal; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,0.1); }
+        .status-locked { color: #ff7675; }
+        .status-unlocked { color: #4cd137; background: rgba(76, 209, 55, 0.1); }
+        .card-locked { opacity: 0.5; filter: grayscale(50%); }
+
+        .reward-item { background: white; border-radius: 15px; padding: 18px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .redeem-btn { background: #1a1a2e; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        @keyframes reward-glow { 0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.06); } 50% { box-shadow: 0 0 20px rgba(225, 177, 44, 0.8); } }
+        .glowing-reward { animation: reward-glow 2s ease-in-out !important; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; width: 85%; max-width: 320px; padding: 30px; border-radius: 20px; text-align: center; position: relative; }
+        
+        /* 升級慶祝動畫特效 */
+        @keyframes tada {
+            0% { transform: scale3d(1, 1, 1); }
+            10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); }
+            30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); }
+            40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); }
+            100% { transform: scale3d(1, 1, 1); }
+        }
+        .animate-tada { animation: tada 1s ease-in-out; }
+        .level-up-title { color: #e1b12c; font-size: 1.5rem; font-weight: bold; margin: 10px 0; text-shadow: 0 2px 4px rgba(225, 177, 44, 0.3); }
+        
+        /* 限時優惠樣式 */
+        .promo-card { background: white; border-radius: 15px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
+        .promo-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; }
+        .badge-location { background: #FFE8D6; color: #D97E3C; }
+        .badge-holiday { background: #FFF0E6; color: #E1B12C; }
+        .badge-buff { background: #E8F5E9; color: #4CAF50; }
+        .badge-emotion { background: #FCE4EC; color: #E91E63; }
+        .badge-task { background: #E3F2FD; color: #2196F3; }
+        .promo-card h3 { margin: 10px 0 5px 0; font-size: 1.1rem; color: #1a1a2e; font-weight: bold; }
+        .promo-card > p { margin: 0 0 12px 0; font-size: 0.9rem; color: #666; }
+        .promo-time { font-size: 0.85rem; color: #888; margin: 10px 0; }
+        .promo-rewards { list-style: none; padding: 10px 0; margin: 10px 0; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+        .promo-rewards li { padding: 5px 0; font-size: 0.9rem; color: #333; }
+        .promo-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s ease; }
+        .promo-btn-active { background-color: #e1b12c; color: #111; }
+        .promo-btn-active:hover { background-color: #d4a120; }
+        .promo-btn-inactive { background-color: #ccc; color: #666; cursor: not-allowed; }
+        .promo-progress { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+        .promo-progress-bar { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+        .promo-progress-fill { height: 100%; background: #e1b12c; transition: width 0.3s ease; }
+        .promo-progress-text { font-size: 0.85rem; font-weight: bold; color: #666; }
+        
+        /* 優惠券狀態樣式 */
+        .promo-card.redeemed { opacity: 0.6; filter: grayscale(100%); }
+        .promo-card.expired { opacity: 0.5; filter: grayscale(100%); }
+        .promo-card.glowing { animation: glow 2s ease-in-out; }
+        @keyframes glow { 0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.06); } 50% { box-shadow: 0 0 20px rgba(225, 177, 44, 0.6); } }
+        .promo-status-badge { display: inline-block; margin-left: 10px; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+        .status-redeemed { background: #e8f5e9; color: #2e7d32; }
+        .status-pending { background: #fff3e0; color: #e65100; }
+        .status-expired { background: #f5f5f5; color: #666; }
+        .memory-card { background: #fffdf5; border: 2px solid #e1b12c; border-radius: 15px; padding: 18px; margin-bottom: 15px; }
+        .memory-date { font-size: 0.85rem; color: #888; margin-bottom: 10px; }
+        .memory-note { font-size: 0.9rem; color: #333; margin: 10px 0; line-height: 1.5; }
+        .memory-images { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .memory-image { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+        .add-memory-btn { background: #e1b12c; color: #111; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 0.85rem; }
+        .add-memory-btn:hover { background: #d4a120; }
+
+        /* 回憶區分類樣式 */
+        .memory-filter-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .memory-filter-btn { padding: 10px 20px; border: 2px solid #ddd; background: white; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; }
+        .memory-filter-btn.active { background: #e1b12c; color: white; border-color: #e1b12c; }
+        .memory-filter-btn:hover { border-color: #e1b12c; }
+
+        /* 已實現回憶卡片 - 相簿風格 */
+        .memory-card-realized { 
+            background: linear-gradient(135deg, #fffdf5 0%, #fffbf0 100%);
+            border: 2px solid #e1b12c;
+            border-radius: 15px; 
+            padding: 18px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(225, 177, 44, 0.15);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .memory-card-realized::before {
+            content: '💖';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            opacity: 0.6;
+        }
+        .memory-card-realized:hover {
+            box-shadow: 0 6px 20px rgba(225, 177, 44, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* 即將發生回憶卡片 - 發光風格 */
+        .memory-card-pending {
+            background: white;
+            border: 2px solid #e1b12c;
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 15px rgba(225, 177, 44, 0.3);
+            animation: memory-pending-glow 2s ease-in-out infinite;
+            position: relative;
+        }
+        @keyframes memory-pending-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(225, 177, 44, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(225, 177, 44, 0.6), inset 0 0 15px rgba(225, 177, 44, 0.1); }
+        }
+
+        /* 錯過的時刻卡片 - 灰色風格 */
+        .memory-card-expired {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 15px;
+            opacity: 0.7;
+            filter: grayscale(100%);
+        }
+
+        /* 分類標題 */
+        .memory-section-title {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: #1a1a2e;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1b12c;
+        }
+        
+        .memory-empty-section { color: #999; text-align: center; padding: 15px; font-size: 0.9rem; }
+        
+        /* 限時活動 Banner 樣式 */
+        .active-banner {
+            background: linear-gradient(135deg, rgba(225, 177, 44, 0.15) 0%, rgba(225, 177, 44, 0.08) 100%);
+            border: 1px solid rgba(225, 177, 44, 0.4);
+            border-radius: 15px;
+            padding: 18px;
+            margin: 20px 0 15px 0;
+            backdrop-filter: blur(10px);
+            animation: banner-slide-in 0.5s ease-out;
+        }
+        
+        @keyframes banner-slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .banner-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #e1b12c;
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .banner-subtitle {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin: 5px 0 10px 0;
+        }
+        
+        .banner-countdown {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
+        
+        /* 每日訊息樣式 */
+        .daily-message {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-align: center;
+            margin: 12px 0 20px 0;
+            padding: 8px 15px;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-card">
+        <div class="header-content">
+            <div style="letter-spacing: 3px; font-weight: bold; color: #e1b12c; font-size: 1.2rem;">Cindy女王專屬集點卡</div>
+            
+            <!-- 限時活動 Banner -->
+            <div id="activeBanner" class="active-banner" style="display: none;"></div>
+            
+            <!-- Daily Message -->
+            <div id="dailyMessage" class="daily-message"></div>
+            
+            <div id="pointsDisplay" style="margin: 15px 0;"></div>
+            <div class="action-area">
+                <input type="number" id="pointInput" class="action-input" placeholder="點數" min="1">
+                <button class="btn-add" onclick="modifyPoints('add')">加點</button>
+                <button class="btn-minus" onclick="modifyPoints('minus')">扣除</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn" onclick="switchTab(event, 'tab-privilege')">💞 專屬偏愛</button>
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-how-to')">✨ 心動日常</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-level')">👑 關係進化</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-rewards')">🎁 願望實現</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-promos')">✨ 限時優惠</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-memories')">💝 我們的回憶</button>
+    </div>
+
+    <div id="tab-privilege" class="tab-content">
+        <div class="info-card">
+            <div class="info-title">💎 會員基本持權 (不扣點)</div>
+            <div class="privilege-item"><div class="header-row"><span class="star">💞</span><span class="title-label">物理親密權</span></div><div class="content-desc">親親、抱抱、牽手，是專屬於妳的日常依賴。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">📸</span><span class="title-label">專屬攝影官</span></div><div class="content-desc">只為妳服務的攝影師，負責記錄妳最漂亮的每一刻。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">🧭</span><span class="title-label">專屬導航系統</span></div><div class="content-desc">妳只需要負責漂亮，找路這件事交給我。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">🛡️</span><span class="title-label">情緒守護權</span></div><div class="content-desc">不論開心或難過，我都會在妳這邊。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">📋</span><span class="title-label">專屬安排權</span></div><div class="content-desc">所有關於我們的約會與細節，我都會幫妳準備好。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">👑</span><span class="title-label">優先被選擇權</span></div><div class="content-desc">在所有選擇裡，妳永遠是我優先考慮的人。</div></div>
+            <div class="privilege-item"><div class="header-row"><span class="star">🌙</span><span class="title-label">專屬陪伴權</span></div><div class="content-desc">不論什麼時候，妳需要我，我都會在。</div></div>
+        </div>
+    </div>
+
+    <div id="tab-how-to" class="tab-content active">
+        <div class="info-card">
+            <div class="info-title"><span>✨ 基礎累積 (1 pt)</span></div>
+            <div class="list-item"><span>✦ 抱抱 / 牽手 / 親親</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 找好吃的/去玩</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 每日早晚安與愛你</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 每日喝水 2.5 瓶</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 每日12:15分以前上床睡覺</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 健身運動 / 報備</span><span class="point-tag">1 pt</span></div>
+            
+            <div class="info-title" style="margin-top:30px;"><span>🌅 浪漫時刻</span></div>
+            <div class="list-item"><span>✦ 一起去看夕陽 / 海邊 / 夜景</span><span class="point-tag">2 pt</span></div>
+            <div class="list-item"><span>✦ 讓 Ray 驚喜的一個小心機</span><span class="point-tag">3 pt</span></div>
+            <div class="list-item">
+                <div>
+                    <span>✦ 快樂的大戰一場</span>
+                    <span class="note-text">(可根據地點與內容，Ray 將給予額外點數)</span>
+                </div>
+                <span class="point-tag">5 pt</span>
+            </div>
+            
+            <div class="info-title" style="margin-top:30px;"><span>💖 是今日心靈互動</span></div>
+            <div class="list-item"><span>✦ 【今日小確幸】分享今天的各式大小事</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 【勇氣獎勵】說出一個小煩惱</span><span class="point-tag">3 pt</span></div>
+            <div class="list-item"><span>✦ 主動關心 Ray 的一天</span><span class="point-tag">1 pt</span></div>
+            <div class="list-item"><span>✦ 嘗試新事物</span><span class="point-tag">1 pt</span></div>
+        </div>
+    </div>
+
+    <div id="tab-level" class="tab-content">
+        <div id="level-500" class="info-card level-card level-black card-locked">
+            <div class="info-title" style="color: white; border-bottom: none; margin-bottom: 5px;">
+                <span>🖤 黑鑽會員</span>
+                <span class="lock-status status-locked" id="status-500">🔒 需 500pt</span>
+            </div>
+            <div style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7; color: #bbb;">解鎖條件：累積達 500 點「無聲的共鳴」</div>
+            <div class="list-item" style="border-bottom: 1px solid #444;"><span style="color: white;">✦ 免死金牌 (每月一次)</span></div>
+            <div class="list-item" style="border-bottom: none;"><span style="color: #888;">✦ 其餘敬請期待...</span></div>
+        </div>
+
+        <div id="level-1000" class="info-card level-card level-crown card-locked"> 
+            <div class="info-title" style="border-bottom: none; margin-bottom: 5px;">
+                <span>👑 皇冠會員</span>
+                <span class="lock-status status-locked" id="status-1000">🔒 需 1000pt</span>
+            </div>
+            <div style="font-size: 0.8rem; margin-bottom: 20px; opacity: 0.7; color: #888;">解鎖條件：累積達 1000 點「終極的專屬感」</div>
+            <div class="list-item"><span>✦ 私人造型訂製權</span></div>
+            <div class="list-item"><span>✦ 免死金牌 (每月二次)</span></div>
+            <div class="list-item"><span>✦ 時空停滯地圖</span></div>
+            <div class="list-item" style="border-bottom: none;"><span style="color: #bbb;">✦ 其餘敬請期待...</span></div>
+        </div>
+    </div>
+
+    <div id="tab-rewards" class="tab-content">
+        <div id="rewardsList"></div>
+    </div>
+
+    <div id="tab-promos" class="tab-content">
+        <div id="promosList"></div>
+    </div>
+
+    <div id="tab-memories" class="tab-content">
+        <div id="memoryList"></div>
+    </div>
+
+    <div class="modal-overlay" id="rewardModal">
+        <div class="modal-content">
+            <div id="modalIcon" style="font-size:3rem;">✨</div>
+            <h3 id="modalTitle">系統通知</h3>
+            <button class="redeem-btn" style="width:100%; margin-top: 15px;" onclick="document.getElementById('rewardModal').style.display='none'">確認</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="levelUpModal">
+        <div class="modal-content animate-tada" style="border: 2px solid #e1b12c;">
+            <div style="font-size:3.5rem;">🎉</div>
+            <div class="level-up-title">LEVEL UP!</div>
+            <h3 style="margin: 5px 0 15px 0;">恭喜解鎖新特權</h3>
+            <p id="levelUpDesc" style="color:#666; font-size:0.95rem; line-height:1.5;"></p>
+            <button class="btn-add" style="width:100%; margin-top: 15px;" onclick="closeLevelUpModal()">太棒了！去看看</button>
+        </div>
+    </div>
+
+    <script>
+        // 正式版 API（雲端資料庫）
+        const API_URL ="https://script.google.com/macros/s/AKfycbwoGHy6x_dlyYehLwdVUwP0bFLOahKdNIo5YINnWtHnpel8J3aBrbLGCMLKxj8MiICy/exec";
+
+        // Header Banner 相關變數
+        let currentActiveBanner = null; // 當前活動 Banner
+        let currentDailyMessage = ''; // 當前每日訊息
+        let dailyMessageCache = {}; // 每日訊息快取 {date: message}
+        let bannerCountdownInterval = null; // Banner 倒數計時器
+
+        const rewards = [
+            { points: 15, title: "精緻下午茶時刻", desc: "Ray 會準備一份專屬妳的甜點與飲料，並附上一句小卡片 💌" },
+            { points: 15, title: "專屬寶貝與我的時刻", desc: "屬於我們的深度聊天，Ray 會認真聽完妳所有想說的話" },
+            { points: 30, title: "💆‍♀️ 專屬放鬆時刻", desc: "一段完全放鬆的時光，Ray 負責讓妳舒服到睡著" },
+            { points: 50, title: "一日『Yes Man』之夜", desc: "Ray 完全聽命於女王" },
+            { points: 50, title: "🎁 神秘驚喜", desc: "Ray 會準備一個完全未知的驚喜（不能問、不能預測）" },
+            { points: 300, title: "🌍 小型夢想旅程", desc: "一趟國內/短途旅行（妳決定）" },
+            { points: 500, title: "✈️ 人生清單解鎖", desc: "實現一個國外夢想地點" }
+        ];
+
+        // 📌 優惠資料現在從 Excel 動態取得
+        // 由 Google Apps Script 從試算表讀取並透過 API 返回
+        // 格式與下方相同，無需在此硬編碼
+        /* 預期的資料結構範例：
+        {
+            id: "promo_xxx",
+            type: "location|holiday|daily_buff|emotion_comfort|task_chain",
+            title: "優惠名稱",
+            subtitle: "簡短說明",
+            startDate: "YYYY-MM-DD",
+            endDate: "YYYY-MM-DD",
+            startTime: "HH:MM",
+            endTime: "HH:MM",
+            // 根據類型添加相應欄位
+        }
+        */
+
+        let currentPoints = 0;
+        let totalAccumulatedPoints = 0;
+        let isSyncing = false; // 用來防止網路延遲時重複按
+        let promos = []; // 改為從 API 動態獲取，初始為空
+
+        // 畫面剛載入時，顯示同步中
+        document.getElementById('pointsDisplay').innerHTML = `
+            <div style="font-size: 1.1rem; color: #e1b12c; margin: 25px 0; font-weight: bold;">
+                🔄 正在與雲端伺服器同步資料...
+            </div>
+        `;
+
+        // 🚀 從 Google 雲端讀取資料
+        async function loadData() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    redirect: 'follow' 
+                });
+                
+                const data = await response.json();
+                currentPoints = data.currentPoints;
+                totalAccumulatedPoints = data.totalPoints;
+                
+                // ✨ 從 API 動態獲取優惠數據（支援新的 coupons 格式）
+                if (data.promos && Array.isArray(data.promos)) {
+                    promos = data.promos;
+                    console.log("✅ 從 API 獲取優惠數據成功，共", promos.length, "項");
+                } else if (data.coupons && Array.isArray(data.coupons)) {
+                    // 新的 API 格式：coupons → promos（需要轉換）
+                    promos = data.coupons.map(coupon => {
+                        const typeMap = {
+                            '任務聯動': 'task_chain',
+                            '在地限定': 'location',
+                            '節日限定': 'holiday',
+                            '日常Buff': 'daily_buff',
+                            '情緒補給': 'emotion_comfort'
+                        };
+                        
+                        // 直接解析 ISO 8601 時間，保持 UTC 時間
+                        const startDate = new Date(coupon.start);
+                        const endDate = new Date(coupon.end);
+                        
+                        // 轉換為本地時間的日期字符串和時間字符串
+                        const startLocal = new Date(startDate.getTime());
+                        const endLocal = new Date(endDate.getTime());
+                        
+                        return {
+                            id: coupon.id,
+                            title: coupon.title,
+                            subtitle: coupon.subtitle,
+                            type: typeMap[coupon.category] || 'task_chain',
+                            category: coupon.category,
+                            startDate: startDate.toISOString().split('T')[0],
+                            endDate: endDate.toISOString().split('T')[0],
+                            // 使用本地時間而不是 UTC 時間
+                            startTime: String(startDate.getHours()).padStart(2, '0') + ':' + String(startDate.getMinutes()).padStart(2, '0'),
+                            endTime: String(endDate.getHours()).padStart(2, '0') + ':' + String(endDate.getMinutes()).padStart(2, '0'),
+                            reward: coupon.reward,
+                            currentProgress: coupon.currentProgress || 0,
+                            targetCount: coupon.targetProgress || 1,
+                            rewards: coupon.rewards ? coupon.rewards.split('、').map(r => ({ name: r })) : [],
+                            tasks: coupon.tasks || [],
+                            finalReward: coupon.reward,
+                            unlockedReward: coupon.reward,
+                            active: coupon.active !== false,
+                            // 保存原始的 UTC 時間用於比較
+                            _startUTC: startDate,
+                            _endUTC: endDate
+                        };
+                    });
+                    console.log("✅ 從 API 獲取優惠數據成功（新格式），共", promos.length, "項");
+                } else {
+                    promos = []; // 如果 API 沒返回優惠，則清空
+                    console.log("ℹ️ API 未返回優惠數據或數據為空");
+                }
+                
+                // 獲取限時活動（支援新的 banner 格式）
+                if (data.limitedEvents && Array.isArray(data.limitedEvents)) {
+                    const activeEvents = data.limitedEvents
+                        .filter(e => e.status === 'active')
+                        .sort((a, b) => a.priority - b.priority);
+                    
+                    if (activeEvents.length > 0) {
+                        currentActiveBanner = activeEvents[0];
+                        displayActiveBanner();
+                    } else {
+                        document.getElementById('activeBanner').style.display = 'none';
+                    }
+                } else if (data.banner && data.banner.active) {
+                    // 新的 API 格式：單個 banner 對象
+                    currentActiveBanner = {
+                        title: data.banner.title,
+                        subtitle: data.banner.subtitle,
+                        endTime: data.banner.end,
+                        priority: data.banner.priority || 1
+                    };
+                    displayActiveBanner();
+                } else {
+                    document.getElementById('activeBanner').style.display = 'none';
+                }
+                
+                // 獲取每日訊息（支援新的 dailyMessage 格式）
+                if (data.dailyMessages && Array.isArray(data.dailyMessages)) {
+                    loadDailyMessage(data.dailyMessages);
+                } else if (data.dailyMessage && typeof data.dailyMessage === 'string') {
+                    // 新的 API 格式：直接單個字符串
+                    currentDailyMessage = data.dailyMessage;
+                    displayDailyMessage();
+                } else {
+                    displayDefaultDailyMessage();
+                }
+                
+                updateHeader(data);
+                updateDisplay();
+                renderPromos(); // 重新渲染優惠券
+            } catch (error) {
+                console.error("抓取失敗：", error);
+                document.getElementById('pointsDisplay').innerHTML = `<div style="color: #ff7675; margin: 20px 0;">連線讀取失敗</div>`;
+                displayDefaultDailyMessage();
+            }
+        }
+
+        // 顯示活動 Banner
+        function displayActiveBanner() {
+            if (!currentActiveBanner) {
+                document.getElementById('activeBanner').style.display = 'none';
+                return;
+            }
+            
+            const banner = currentActiveBanner;
+            const endTime = new Date(`${banner.endTime}`);
+            
+            // 計算倒數時間
+            const updateCountdown = () => {
+                const now = new Date();
+                const diff = endTime - now;
+                
+                if (diff <= 0) {
+                    document.getElementById('activeBanner').style.display = 'none';
+                    if (bannerCountdownInterval) clearInterval(bannerCountdownInterval);
+                    return;
+                }
+                
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                const bannerEl = document.getElementById('activeBanner');
+                if (bannerEl && bannerEl.querySelector('.banner-countdown')) {
+                    bannerEl.querySelector('.banner-countdown').textContent = 
+                        `⏱️ 剩餘時間：${hours}小時 ${minutes}分鐘`;
+                }
+            };
+            
+            const bannerHTML = `
+                <div class="banner-title">🎉 ${banner.title}</div>
+                <div class="banner-subtitle">${banner.subtitle || ''}</div>
+                <div class="banner-countdown">⏱️ 計算中...</div>
+            `;
+            
+            const bannerEl = document.getElementById('activeBanner');
+            bannerEl.innerHTML = bannerHTML;
+            bannerEl.style.display = 'block';
+            
+            // 清除舊的計時器
+            if (bannerCountdownInterval) clearInterval(bannerCountdownInterval);
+            
+            // 立即更新一次
+            updateCountdown();
+            
+            // 每分鐘更新一次倒數
+            bannerCountdownInterval = setInterval(updateCountdown, 60000);
+        }
+
+        // 加載每日訊息
+        function loadDailyMessage(dailyMessages) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // 檢查快取
+            if (dailyMessageCache[today]) {
+                currentDailyMessage = dailyMessageCache[today];
+                displayDailyMessage();
+                return;
+            }
+            
+            // 篩選活動的訊息
+            const activeMessages = dailyMessages.filter(m => m.active === true);
+            
+            if (activeMessages.length === 0) {
+                displayDefaultDailyMessage();
+                return;
+            }
+            
+            // 根據日期選擇（保證同一天內固定）
+            const dayHash = today.replace(/-/g, '').charCodeAt(0) + 
+                          today.replace(/-/g, '').charCodeAt(1) + 
+                          today.replace(/-/g, '').charCodeAt(2);
+            
+            const messageIndex = dayHash % activeMessages.length;
+            currentDailyMessage = activeMessages[messageIndex].message;
+            
+            // 快取今天的訊息
+            dailyMessageCache[today] = currentDailyMessage;
+            
+            displayDailyMessage();
+        }
+
+        // 顯示每日訊息
+        function displayDailyMessage() {
+            const messageEl = document.getElementById('dailyMessage');
+            messageEl.textContent = currentDailyMessage || '今天也要一起創造美好回憶呢 💕';
+        }
+
+        // 顯示預設每日訊息
+        function displayDefaultDailyMessage() {
+            currentDailyMessage = '今天也要一起創造美好回憶呢 💕';
+            displayDailyMessage();
+        }
+
+       // 🚀 存檔到 Google 雲端
+        async function saveData(oldTotal, action) {
+            isSyncing = true;
+            document.getElementById('pointsDisplay').style.opacity = '0.5'; 
+
+            try {
+                // 【關鍵修正】: 把 /save 拿掉，改成 ?action=save 才能對應後端的 e.parameter.action === 'save'
+                const saveUrl = `${API_URL}?action=save&current=${currentPoints}&total=${totalAccumulatedPoints}`;
+                
+                // 加上 redirect: 'follow' 確保存檔後能正確收到回傳的 success
+                await fetch(saveUrl, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+
+                updateDisplay();
+                document.getElementById('pointsDisplay').style.opacity = '1';
+                isSyncing = false;
+
+                // 只有加點且剛剛好跨越門檻時觸發動畫
+                if (action === 'add') {
+                    if (oldTotal < 500 && totalAccumulatedPoints >= 500) {
+                        triggerLevelUp("🖤 黑鑽會員", "妳已成功累積 500 點無聲的共鳴！<br>正式獲得【免死金牌】特權！");
+                    } else if (oldTotal < 1000 && totalAccumulatedPoints >= 1000) {
+                        triggerLevelUp("👑 皇冠會員", "太神啦！累積突破 1000 點！<br>妳現在是擁有終極專屬感的皇冠女王！");
+                    }
+                }
+            } catch (error) {
+                console.error("存檔錯誤詳情:", error);
+                alert("存檔失敗！請檢查網路連線。");
+                isSyncing = false;
+                document.getElementById('pointsDisplay').style.opacity = '1';
+            }
+        }
+
+        // ✨ 更新頁面頭部信息（支持動態更新）
+        function updateHeader(data) {
+            // 1️⃣ 更新每日訊息
+            if (data.dailyMessage) {
+                const msgElement = document.getElementById('dailyMessage');
+                if (msgElement) {
+                    msgElement.textContent = data.dailyMessage;
+                }
+            }
+            
+            // 2️⃣ 可擴展：未來可在這裡添加其他動態頭部更新
+            // 例如：banner、推薦訊息等
+        }
+
+        // 🎯 動態渲染優惠券（從 Excel 來的資料）
+        function renderDynamicCoupons(coupons) {
+            const list = document.getElementById('promosList');
+            
+            // 先清空目前畫面上的所有內容
+            list.innerHTML = ''; 
+
+            // 如果 Excel 沒資料，就顯示提示文字
+            if (!coupons || coupons.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#999; padding: 30px; font-size: 0.9rem;">目前沒有進行中的活動喔 🎁</p>';
+                return;
+            }
+
+            // 根據 Excel 資料產生新的卡片
+            coupons.forEach(p => {
+                const status = getPromoStatus(p.id);
+                // 只顯示未兌換且未過期的優惠
+                if (status.status === 'available') {
+                    list.innerHTML += renderPromo(p, false);
+                }
+            });
+            
+            // 如果沒有未兌換的優惠，顯示提示
+            if (list.innerHTML === '') {
+                list.innerHTML = '<p style="text-align:center; color:#999; padding: 30px; font-size: 0.9rem;">所有優惠都已兌換或已過期了唷 ✨</p>';
+            }
+        }
+
+        function updateDisplay() {
+            // 獲取當前活動的優惠（使用 UTC 時間進行比較）
+            const now = new Date();
+            const activePromos = promos.filter(p => {
+                // 使用原始 UTC 時間進行比較，如果沒有則回退使用轉換後的日期
+                if (p._startUTC && p._endUTC) {
+                    return p._startUTC <= now && now <= p._endUTC && !promoHistory.find(ph => ph.promoId === p.id);
+                } else {
+                    // 回退方案
+                    const startDate = new Date(p.startDate);
+                    const endDate = new Date(`${p.endDate} ${p.endTime}`);
+                    return startDate <= now && now <= endDate && !promoHistory.find(ph => ph.promoId === p.id);
+                }
+            });
+            
+            // 獲取已兌換的獎勵
+            const redeemedRewards = redeemHistory.filter(r => r.status === 'completed');
+            
+            let activePromoHtml = '';
+            if (activePromos.length > 0) {
+                activePromoHtml = `
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(225, 177, 44, 0.1); border-left: 3px solid #e1b12c; border-radius: 5px; font-size: 0.85rem;">
+                        <div style="color: #e1b12c; font-weight: bold; margin-bottom: 5px;">🎉 正在進行的限時活動</div>
+                        ${activePromos.map(p => `<div style="opacity: 0.9; margin: 3px 0;">• ${p.title}</div>`).join('')}
+                    </div>
+                `;
+            }
+            
+            let redeemedRewardHtml = '';
+            if (redeemedRewards.length > 0) {
+                redeemedRewardHtml = `
+                    <div style="margin-top: 10px; padding: 10px; background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545; border-radius: 5px; font-size: 0.85rem;">
+                        <div style="color: #dc3545; font-weight: bold; margin-bottom: 5px;">✨ 已實現的願望</div>
+                        ${redeemedRewards.map(r => `<div style="opacity: 0.9; margin: 3px 0;">• ${r.title}</div>`).join('')}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('pointsDisplay').innerHTML = `
+                <div style="font-size: 0.9rem; opacity: 0.8;">目前可用點數</div>
+                <div style="font-size: 3.5rem; font-weight: bold; color: #fff;">${currentPoints}</div>
+                <div style="font-size: 0.85rem; opacity: 0.6; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 5px; display: inline-block;">
+                    總累積進度：${totalAccumulatedPoints} pt
+                </div>
+                ${activePromoHtml}
+                ${redeemedRewardHtml}
+            `;
+
+            const level500 = document.getElementById('level-500');
+            const status500 = document.getElementById('status-500');
+            if (totalAccumulatedPoints >= 500) {
+                level500.classList.remove('card-locked');
+                status500.className = 'lock-status status-unlocked';
+                status500.innerText = '✅ 已解鎖';
+            } else {
+                level500.classList.add('card-locked');
+                status500.className = 'lock-status status-locked';
+                status500.innerText = `🔒 需 500pt (差 ${500 - totalAccumulatedPoints}pt)`;
+            }
+
+            const level1000 = document.getElementById('level-1000');
+            const status1000 = document.getElementById('status-1000');
+            if (totalAccumulatedPoints >= 1000) {
+                level1000.classList.remove('card-locked');
+                status1000.className = 'lock-status status-unlocked';
+                status1000.innerText = '✅ 已解鎖';
+            } else {
+                level1000.classList.add('card-locked');
+                status1000.className = 'lock-status status-locked';
+                status1000.innerText = `🔒 需 1000pt (差 ${1000 - totalAccumulatedPoints}pt)`;
+            }
+        }
+
+        async function modifyPoints(action) {
+            if (isSyncing) return; 
+            const inputField = document.getElementById('pointInput');
+            const val = parseInt(inputField.value);
+
+            if (val === 999) {
+                let adminVal = parseInt(prompt("【管理員模式】輸入新的累積總點數："));
+                if(!isNaN(adminVal)){
+                    totalAccumulatedPoints = adminVal;
+                    await saveData(totalAccumulatedPoints, 'admin');
+                }
+                inputField.value = ''; return;
+            }
+            if(isNaN(val) || val <= 0) return;
+
+            let oldTotal = totalAccumulatedPoints; 
+
+            if(action === 'add') { 
+                currentPoints += val; 
+                totalAccumulatedPoints += val; 
+            } else { 
+                currentPoints = Math.max(0, currentPoints - val); 
+            }
+
+            inputField.value = '';
+            await saveData(oldTotal, action); // 呼叫存檔
+        }
+
+        function triggerLevelUp(levelName, descHtml) {
+            document.getElementById('levelUpDesc').innerHTML = `晉升為 <b>${levelName}</b><br><br>${descHtml}`;
+            document.getElementById('levelUpModal').style.display = 'flex';
+            const modalContent = document.querySelector('#levelUpModal .modal-content');
+            modalContent.classList.remove('animate-tada');
+            void modalContent.offsetWidth;
+            modalContent.classList.add('animate-tada');
+        }
+
+        function closeLevelUpModal() {
+            document.getElementById('levelUpModal').style.display = 'none';
+            document.querySelector('.tab-btn:nth-child(3)').click();
+        }
+
+        function switchTab(evt, tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            if(evt) evt.currentTarget.classList.add('active');
+        }
+
+        function renderRewards() {
+            const list = document.getElementById('rewardsList');
+            list.innerHTML = '';
+            // 依點數從小到大排序
+            const sortedRewards = [...rewards].sort((a, b) => a.points - b.points);
+            sortedRewards.forEach(r => {
+                list.innerHTML += `
+                <div class="reward-item">
+                    <div style="flex: 1;">
+                        <div style="font-weight:bold;">${r.title}</div>
+                        <div style="font-size:0.8rem; color:#666;">${r.desc}</div>
+                    </div>
+                    <button class="redeem-btn" onclick="redeem('${r.title}', ${r.points})">${r.points} pt</button>
+                </div>`;
+            });
+        }
+
+        function getBadgeClass(type) {
+            const badgeMap = {
+                location: { class: "badge-location", text: "📍 在地限定" },
+                holiday: { class: "badge-holiday", text: "🎉 節日限定" },
+                daily_buff: { class: "badge-buff", text: "⚡ 日常Buff" },
+                emotion_comfort: { class: "badge-emotion", text: "💝 情緒補給" },
+                task_chain: { class: "badge-task", text: "🎯 任務達成" }
+            };
+            return badgeMap[type] || { class: "badge-location", text: "✨ 優惠" };
+        }
+
+        function getPromoStatus(promoId) {
+            // 檢查是否已兌換
+            const redeemed = promoHistory.find(p => p.promoId === promoId);
+            if (redeemed) return { status: 'redeemed', data: redeemed };
+            
+            // 檢查是否已過期
+            const promo = promos.find(p => p.id === promoId);
+            if (promo) {
+                // 使用原始 UTC 時間進行比較，如果沒有則回退
+                const now = new Date();
+                const isExpired = promo._endUTC ? (promo._endUTC < now) : (new Date(`${promo.endDate} ${promo.endTime}`) < now);
+                if (isExpired) {
+                    return { status: 'expired', data: null };
+                }
+            }
+            
+            return { status: 'available', data: null };
+        }
+
+        function renderPromo(promo, isInMemory = false) {
+            const badge = getBadgeClass(promo.type);
+            const promoStatus = getPromoStatus(promo.id);
+            let content = '';
+
+            if (promo.type === 'location' || promo.type === 'emotion_comfort') {
+                content = `
+                    <div>${promo.subtitle}</div>
+                    <div class="promo-time">⏱️ ${promo.startDate} ${promo.startTime} - ${promo.endDate} ${promo.endTime}</div>
+                    <div class="promo-rewards">
+                        ${promo.rewards.map(r => `<li>🎁 ${r.name}</li>`).join('')}
+                    </div>
+                    ${promoStatus.status === 'available' ? `<button class="promo-btn promo-btn-active" onclick="claimPromo('${promo.id}', '${promo.type}')">立即領取</button>` : ''}
+                `;
+            } else if (promo.type === 'holiday') {
+                content = `
+                    <div>${promo.subtitle}</div>
+                    <div class="promo-time">📅 ${promo.startDate}</div>
+                    <div class="promo-rewards">
+                        ${promo.tasks.map(t => `<li>☐ ${t}</li>`).join('')}
+                    </div>
+                    <div style="margin-top: 10px; padding: 10px; background: #fff9e6; border-radius: 8px; font-size: 0.9rem;">🎁 完成全部 → ${promo.finalReward}</div>
+                    ${promoStatus.status === 'available' ? `<button class="promo-btn promo-btn-active" onclick="claimPromo('${promo.id}', '${promo.type}')">查看任務</button>` : ''}
+                `;
+            } else if (promo.type === 'daily_buff') {
+                content = `
+                    <div>${promo.subtitle}</div>
+                    <div style="font-size: 0.9rem; color: #666; margin: 10px 0;">${promo.description}</div>
+                    <div class="promo-time">📅 有效期：${promo.startDate} - ${promo.endDate}</div>
+                    ${promoStatus.status === 'available' ? `<button class="promo-btn promo-btn-active" onclick="claimPromo('${promo.id}', '${promo.type}', ${promo.rewardPoints})">✓ 標記完成 +${promo.rewardPoints}pt</button>` : ''}
+                `;
+            } else if (promo.type === 'task_chain') {
+                const progress = promo.currentProgress || 0;
+                const percentage = (progress / promo.targetCount) * 100;
+                content = `
+                    <div>${promo.subtitle}</div>
+                    <div class="promo-progress">
+                        <div class="promo-progress-bar">
+                            <div class="promo-progress-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="promo-progress-text">${progress}/${promo.targetCount}</div>
+                    </div>
+                    <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; font-size: 0.9rem;">🏆 解鎖獎勵：${promo.unlockedReward}</div>
+                    ${promoStatus.status === 'available' ? `<button class="promo-btn ${progress >= promo.targetCount ? 'promo-btn-active' : 'promo-btn-inactive'}" ${progress >= promo.targetCount ? '' : 'disabled'}>進行中</button>` : ''}
+                `;
+            }
+
+            let cardClass = 'promo-card';
+            let statusBadge = '';
+            
+            if (isInMemory && promoStatus.status === 'redeemed') {
+                cardClass += ' redeemed';
+                statusBadge = `<span class="promo-status-badge status-redeemed">✅ 已兌換</span>`;
+            } else if (isInMemory && promoStatus.status === 'expired') {
+                cardClass += ' expired';
+                statusBadge = `<span class="promo-status-badge status-expired">⏳ 已過期</span>`;
+            }
+
+            return `
+                <div class="${cardClass}">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="promo-badge ${badge.class}">${badge.text}</span>
+                        ${statusBadge}
+                    </div>
+                    <h3>${promo.title}</h3>
+                    ${content}
+                    ${isInMemory && promoStatus.status === 'redeemed' ? `
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                            ${promoStatus.data && promoStatus.data.notes ? `<div class="memory-note">💭 ${promoStatus.data.notes}</div>` : ''}
+                            ${promoStatus.data && promoStatus.data.images && promoStatus.data.images.length > 0 ? `
+                                <div class="memory-images">
+                                    ${promoStatus.data.images.map(img => `<img src="${img}" class="memory-image" alt="回憶照片">`).join('')}
+                                </div>
+                            ` : ''}
+                            <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button class="add-memory-btn" onclick="addPromoNote('${promo.id}')">📝 加入記憶</button>
+                                <button class="add-memory-btn" onclick="addPromoImage('${promo.id}')">📷 加入照片</button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderPromos() {
+            // 調用動態優惠券渲染函數
+            renderDynamicCoupons(promos);
+        }
+
+        async function claimPromo(promoId, promoType, points = 0) {
+            const promo = promos.find(p => p.id === promoId);
+            if (!promo) return;
+
+            if (promoType === 'daily_buff') {
+                currentPoints += points;
+                totalAccumulatedPoints += points;
+                await saveData(totalAccumulatedPoints - points, 'add');
+                
+                // 將daily_buff也加入回憶追蹤
+                const existingPromo = promoHistory.find(p => p.promoId === promoId);
+                if (!existingPromo) {
+                    promoHistory.push({
+                        promoId: promoId,
+                        claimedDate: new Date().toLocaleDateString('zh-TW'),
+                        status: 'pending',
+                        notes: '',
+                        images: []
+                    });
+                }
+                
+                document.getElementById('modalTitle').innerText = `成功！+${points}點\n\n💝 已移入【即將發生】區`;
+                document.getElementById('modalIcon').innerText = "✨";
+            } else {
+                // 追蹤兌換的優惠
+                const existingPromo = promoHistory.find(p => p.promoId === promoId);
+                if (!existingPromo) {
+                    promoHistory.push({
+                        promoId: promoId,
+                        claimedDate: new Date().toLocaleDateString('zh-TW'),
+                        status: 'pending',
+                        notes: '',
+                        images: []
+                    });
+                }
+                
+                document.getElementById('modalTitle').innerText = `🎉 優惠已領取\n\n💝 已移入【即將發生】區`;
+                document.getElementById('modalIcon').innerText = "✨";
+            }
+            document.getElementById('rewardModal').style.display = 'flex';
+            renderPromos();
+            renderMemories();
+            updateDisplay();
+        }
+
+        function addPromoNote(promoId) {
+            const promo = promoHistory.find(p => p.promoId === promoId);
+            if (promo) {
+                const notes = prompt('記錄一下當天的心情和回憶：', promo.notes);
+                if (notes !== null) {
+                    promo.notes = notes;
+                    renderMemories();
+                }
+            }
+        }
+
+        function addPromoImage(promoId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const promo = promoHistory.find(p => p.promoId === promoId);
+                        if (promo) {
+                            if (!promo.images) promo.images = [];
+                            promo.images.push(event.target.result);
+                            renderMemories();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        async function redeem(title, points) {
+            if(isSyncing) return;
+            if(currentPoints >= points) {
+                currentPoints -= points;
+                
+                // 添加到兌換紀錄
+                const redemption = {
+                    id: 'redeem_' + Date.now(),
+                    title: title,
+                    points: points,
+                    redeemedDate: new Date().toLocaleDateString('zh-TW'),
+                    status: 'pending', // pending: 待實現, completed: 已完成
+                    completedDate: null,
+                    notes: '',
+                    images: []
+                };
+                redeemHistory.push(redemption);
+                
+                // 觸發發光動畫
+                const rewardItems = document.querySelectorAll('.reward-item');
+                rewardItems.forEach(item => {
+                    if(item.textContent.includes(title)) {
+                        item.classList.add('glowing-reward');
+                        setTimeout(() => { item.classList.remove('glowing-reward'); }, 2000);
+                    }
+                });
+                
+                await saveData(totalAccumulatedPoints, 'redeem');
+                
+                // 自訂兌換成功訊息
+                const shortTitle = title.replace('💆‍♀️ ', '').replace('🎁 ', '').replace('🌍 ', '').replace('✈️ ', '');
+                const emoticon = title.includes('按摩') ? '💆‍♀️' : title.includes('驚喜') ? '🎁' : title.includes('旅程') ? '🌍' : title.includes('清單') ? '✈️' : '💝';
+                
+                document.getElementById('modalTitle').innerText = `🎉 兌換成功！"${shortTitle}"已解鎖\n\n${emoticon} 請期待專屬妳的${shortTitle}\n\n狀態已變更為【即將實現】`;
+                document.getElementById('modalIcon').innerText = "✨";
+                
+                renderRewards();
+                renderMemories();
+            } else {
+                document.getElementById('modalTitle').innerText = "點數不足";
+                document.getElementById('modalIcon').innerText = "🥺";
+            }
+            document.getElementById('rewardModal').style.display = 'flex';
+        }
+
+        let redeemHistory = [];
+        let promoHistory = []; // 追蹤已兌換的優惠
+
+        function addMemoryNote(redemptionId) {
+            const redemption = redeemHistory.find(r => r.id === redemptionId);
+            if (redemption) {
+                const notes = prompt('記錄一下當天的心情和回憶：');
+                if (notes !== null) {
+                    redemption.notes = notes;
+                    renderMemories();
+                }
+            }
+        }
+
+        function addMemoryImage(redemptionId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const redemption = redeemHistory.find(r => r.id === redemptionId);
+                        if (redemption) {
+                            if (!redemption.images) redemption.images = [];
+                            redemption.images.push(event.target.result);
+                            renderMemories();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        function completeMemory(redemptionId) {
+            const redemption = redeemHistory.find(r => r.id === redemptionId);
+            if (redemption && redemption.status === 'pending') {
+                redemption.status = 'completed';
+                redemption.completedDate = new Date().toLocaleDateString('zh-TW');
+                renderMemories();
+            }
+        }
+
+        function completePromo(promoId) {
+            const promo = promoHistory.find(p => p.promoId === promoId);
+            if (promo && promo.status === 'pending') {
+                promo.status = 'completed';
+                promo.completedDate = new Date().toLocaleDateString('zh-TW');
+                renderMemories();
+            }
+        }
+
+        let currentMemoryFilter = 'all'; // 測追目前的回憶篩選
+
+        function getMemoryCardClass(promoStatus, redempStatus) {
+            // 對于優惠：已完成是已實現，待實現是即將發生，已過期是錯過的時刻
+            if (promoStatus === 'completed') return 'memory-card-realized';
+            if (promoStatus === 'pending') return 'memory-card-pending';
+            if (promoStatus === 'expired') return 'memory-card-expired';
+            
+            // 對于賺买物品：已完成是已實現，待實現是即將發生
+            if (redempStatus === 'completed') return 'memory-card-realized';
+            if (redempStatus === 'pending') return 'memory-card-pending';
+            
+            return 'memory-card';
+        }
+
+        function shouldShowMemory(type, status) {
+            if (currentMemoryFilter === 'all') return true;
+            if (currentMemoryFilter === 'realized') return status === 'realized';
+            if (currentMemoryFilter === 'pending') return status === 'pending';
+            if (currentMemoryFilter === 'expired') return status === 'expired';
+            return true;
+        }
+
+        function renderMemories() {
+            const list = document.getElementById('memoryList');
+            let content = '';
+            
+            // 添加篩選按鈐
+            content += `
+                <div class="memory-filter-tabs">
+                    <button class="memory-filter-btn ${currentMemoryFilter === 'all' ? 'active' : ''}" onclick="filterMemories('all')">✨ 所有故事</button>
+                    <button class="memory-filter-btn ${currentMemoryFilter === 'realized' ? 'active' : ''}" onclick="filterMemories('realized')">💖 已實現回憶</button>
+                    <button class="memory-filter-btn ${currentMemoryFilter === 'pending' ? 'active' : ''}" onclick="filterMemories('pending')">🎁 即將發生</button>
+                    <button class="memory-filter-btn ${currentMemoryFilter === 'expired' ? 'active' : ''}" onclick="filterMemories('expired')">🕰️ 錯過的時刻</button>
+                </div>
+            `;
+            
+            let hasContent = false;
+            
+            if (currentMemoryFilter === 'all' || currentMemoryFilter === 'realized' || currentMemoryFilter === 'pending' || currentMemoryFilter === 'expired') {
+                // 顯示已完成的優惠
+                const completedPromos = promos.filter(p => {
+                    const ph = promoHistory.find(ph => ph.promoId === p.id);
+                    return ph && ph.status === 'completed';
+                });
+                if (completedPromos.length > 0 && (currentMemoryFilter === 'all' || currentMemoryFilter === 'realized')) {
+                    content += `<div class="memory-section-title">💖 已實現回憶 - 優惠體驗</div>`;
+                    completedPromos.forEach(p => {
+                        const promoHistory_item = promoHistory.find(ph => ph.promoId === p.id);
+                            const cardClass = 'memory-card-realized';
+                            const badge = getBadgeClass(p.type);
+                            content += `
+                                <div class="${cardClass}">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span class="promo-badge ${badge.class}">${badge.text}</span>
+                                        <span class="promo-status-badge status-redeemed">✅ 已完成</span>
+                                    </div>
+                                    <h3 style="margin: 10px 0 5px 0; color: #1a1a2e;">${p.title}</h3>
+                                    <div class="memory-date">📅 已兌換：${promoHistory_item.claimedDate}</div>
+                                    ${promoHistory_item.completedDate ? `<div class="memory-date">🎉 體驗於：${promoHistory_item.completedDate}</div>` : ''}
+                                    ${promoHistory_item.notes ? `<div class="memory-note">💭 ${promoHistory_item.notes}</div>` : ''}
+                                    ${promoHistory_item.images && promoHistory_item.images.length > 0 ? `
+                                        <div class="memory-images">
+                                            ${promoHistory_item.images.map(img => `<img src="${img}" class="memory-image" alt="\u56de\u61b6\u7167\u7247">`).join('')}
+                                        </div>
+                    ` : ''}
+                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="add-memory-btn" onclick="addPromoNote('${p.id}')">📝 加入記憶</button>
+                        <button class="add-memory-btn" onclick="addPromoImage('${p.id}')">📷 加入照片</button>
+                    </div>
+                </div>
+            `;
+            hasContent = true;
+                    });
+                }
+                
+                // 顯示待完成的優惠
+                const pendingPromos = promos.filter(p => {
+                    const ph = promoHistory.find(ph => ph.promoId === p.id);
+                    return ph && ph.status === 'pending';
+                });
+                if (pendingPromos.length > 0 && (currentMemoryFilter === 'all' || currentMemoryFilter === 'pending')) {
+                    content += `<div class="memory-section-title">🎁 即將發生 - 優惠體驗</div>`;
+                    pendingPromos.forEach(p => {
+                        const promoHistory_item = promoHistory.find(ph => ph.promoId === p.id);
+                        const badge = getBadgeClass(p.type);
+                        content += `
+                            <div class="memory-card-pending">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span class="promo-badge ${badge.class}">${badge.text}</span>
+                                    <span class="promo-status-badge status-pending">⏳ 待體驗</span>
+                                </div>
+                                <h3 style="margin: 10px 0 5px 0; color: #1a1a2e;">${p.title}</h3>
+                                <div class="memory-date">📅 已兌換：${promoHistory_item.claimedDate}</div>
+                                ${promoHistory_item.notes ? `<div class="memory-note">💭 ${promoHistory_item.notes}</div>` : ''}
+                                ${promoHistory_item.images && promoHistory_item.images.length > 0 ? `
+                                    <div class="memory-images">
+                                        ${promoHistory_item.images.map(img => `<img src="${img}" class="memory-image" alt="\u56de\u61b6\u7167\u7247">`).join('')}
+                                    </div>
+                                ` : ''}
+                                <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="add-memory-btn" onclick="addPromoNote('${p.id}')">📝 加入記憶</button>
+                                    <button class="add-memory-btn" onclick="addPromoImage('${p.id}')">📷 加入照片</button>
+                                    <button class="add-memory-btn" onclick="completePromo('${p.id}')">✓ 標記完成</button>
+                                </div>
+                            </div>
+                        `;
+                        hasContent = true;
+                    });
+                }
+                
+                // 顯示即將發生的賺买
+                if (redeemHistory.filter(r => r.status === 'pending').length > 0) {
+                    if (currentMemoryFilter === 'all' || currentMemoryFilter === 'pending') {
+                        content += `<div class="memory-section-title">🎁 即將發生 - 待實現的筴頁</div>`;
+                        redeemHistory.filter(r => r.status === 'pending').forEach(r => {
+                            const cardClass = 'memory-card-pending';
+                            content += `
+                                <div class="${cardClass}">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <h3 style="margin: 0; color: #1a1a2e;">${r.title}</h3>
+                                        <span class="promo-status-badge status-pending">⏳ 待實現</span>
+                                    </div>
+                                    <div class="memory-date">📅 已兌換：${r.redeemedDate}</div>
+                                    ${r.notes ? `<div class="memory-note">💭 ${r.notes}</div>` : ''}
+                                    ${r.images && r.images.length > 0 ? `
+                                        <div class="memory-images">
+                                            ${r.images.map(img => `<img src="${img}" class="memory-image" alt="\u56de\u61b6\u7167\u7247">`).join('')}
+                                        </div>
+                                    ` : ''}
+                                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                        <button class="add-memory-btn" onclick="addMemoryNote('${r.id}')">📝 加入記憶</button>
+                                        <button class="add-memory-btn" onclick="addMemoryImage('${r.id}')">📷 加入照片</button>
+                                        <button class="add-memory-btn" onclick="completeMemory('${r.id}')">✓ 標記完成</button>
+                                    </div>
+                                </div>
+                            `;
+                            hasContent = true;
+                        });
+                    }
+                }
+                
+                // 顯示已完成的賺买
+                if (redeemHistory.filter(r => r.status === 'completed').length > 0) {
+                    if (currentMemoryFilter === 'all' || currentMemoryFilter === 'realized') {
+                        if (redeemHistory.filter(r => r.status === 'completed').length > 0 && !content.includes('已實現回憶')) {
+                            content += `<div class="memory-section-title">💖 已實現回憶 - 可亲可符</div>`;
+                        }
+                        redeemHistory.filter(r => r.status === 'completed').forEach(r => {
+                            const cardClass = 'memory-card-realized';
+                            content += `
+                                <div class="${cardClass}">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <h3 style="margin: 0; color: #1a1a2e;">${r.title}</h3>
+                                        <span class="promo-status-badge status-redeemed">✅ 已完成</span>
+                                    </div>
+                                    <div class="memory-date">📅 已兌換：${r.redeemedDate}</div>
+                                    ${r.completedDate ? `<div class="memory-date">🎉 完成於：${r.completedDate}</div>` : ''}
+                                    ${r.notes ? `<div class="memory-note">💭 ${r.notes}</div>` : ''}
+                                    ${r.images && r.images.length > 0 ? `
+                                        <div class="memory-images">
+                                            ${r.images.map(img => `<img src="${img}" class="memory-image" alt="\u56de\u61b6\u7167\u7247">`).join('')}
+                                        </div>
+                                    ` : ''}
+                                    <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                        <button class="add-memory-btn" onclick="addMemoryNote('${r.id}')">📝 加入記憶</button>
+                                        <button class="add-memory-btn" onclick="addMemoryImage('${r.id}')">📷 加入照片</button>
+                                    </div>
+                                </div>
+                            `;
+                            hasContent = true;
+                        });
+                    }
+                }
+                
+                // 顯示已過期的優惠
+                const expiredPromos = promos.filter(p => {
+                    const endDate = new Date(`${p.endDate} ${p.endTime}`);
+                    return endDate < new Date() && !promoHistory.find(ph => ph.promoId === p.id);
+                });
+                if (expiredPromos.length > 0) {
+                    if (currentMemoryFilter === 'all' || currentMemoryFilter === 'expired') {
+                        content += `<div class="memory-section-title">🕰️ 錯過的時刻</div>`;
+                        expiredPromos.forEach(p => {
+                            const badge = getBadgeClass(p.type);
+                            content += `
+                                <div class="memory-card-expired">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span class="promo-badge ${badge.class}">${badge.text}</span>
+                                        <span class="promo-status-badge status-expired">⏳ 已過期</span>
+                                    </div>
+                                    <h3 style="margin: 10px 0 5px 0; color: #1a1a2e;">${p.title}</h3>
+                                    <div class="memory-date">📅 有效時段：${p.startDate} - ${p.endDate}</div>
+                                </div>
+                            `;
+                            hasContent = true;
+                        });
+                    }
+                }
+            }
+            
+            if (!hasContent) {
+                content += '<div class="memory-empty-section">💭 還沒有回憶呢，快去創造一些特別的時刻吧 💝</div>';
+            }
+            
+            list.innerHTML = content;
+        }
+
+        function filterMemories(filter) {
+            currentMemoryFilter = filter;
+            renderMemories();
+        }
+
+        // 網頁啟動時，第一件事就是去抓雲端資料！
+        // 顯示預設每日訊息（在 loadData 完成前）
+        displayDefaultDailyMessage();
+        
+        renderRewards();
+        renderPromos();
+        renderMemories();
+        loadData();
+    </script>
+</body>
+</html>
