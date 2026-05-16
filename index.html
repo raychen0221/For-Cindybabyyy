@@ -228,6 +228,246 @@
             letter-spacing: 0.5px;
             color: white;
         }
+
+        /* ===== 響應式設計 (RWD) ===== */
+        /* 小型手機 (iPhone 等) - 寬度 ≤ 480px */
+        @media (max-width: 480px) {
+            .header-card { padding: 30px 15px; }
+            .header-content h1 { font-size: 1.5rem; }
+            .header-content p { font-size: 0.9rem; }
+            
+            .tabs { margin: 10px; padding: 3px; gap: 3px; }
+            .tab-btn { font-size: 0.7rem; padding: 8px 3px; }
+            
+            .tab-content { padding: 0 15px; }
+            
+            /* 優惠 Badge - 調整尺寸，確保文字不跑掉 */
+            .promo-badge { 
+                display: inline-block; 
+                padding: 5px 10px; 
+                border-radius: 15px; 
+                font-size: 0.7rem; 
+                font-weight: bold; 
+                margin-bottom: 10px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+            }
+            
+            .badge-location { background: #FFE8D6; color: #D97E3C; }
+            .badge-holiday { background: #FFF0E6; color: #E1B12C; }
+            .badge-buff { background: #E8F5E9; color: #4CAF50; }
+            .badge-emotion { background: #FCE4EC; color: #E91E63; }
+            .badge-task { background: #E3F2FD; color: #2196F3; }
+            
+            /* 優惠卡片 */
+            .promo-card { 
+                padding: 12px; 
+                margin-bottom: 12px; 
+                border-radius: 12px; 
+            }
+            
+            .promo-card h3 { 
+                font-size: 0.95rem; 
+                margin: 8px 0 4px 0; 
+            }
+            
+            .promo-card > p { 
+                font-size: 0.8rem; 
+                margin: 0 0 10px 0; 
+            }
+            
+            .promo-time { 
+                font-size: 0.75rem; 
+                margin: 8px 0; 
+            }
+            
+            .promo-rewards { 
+                padding: 8px 0; 
+                margin: 8px 0; 
+            }
+            
+            .promo-rewards li { 
+                font-size: 0.8rem; 
+                padding: 4px 0; 
+            }
+            
+            .promo-btn { 
+                padding: 10px; 
+                font-size: 0.85rem; 
+                margin-top: 8px; 
+            }
+            
+            .promo-progress-text { 
+                font-size: 0.75rem; 
+            }
+            
+            /* 狀態 Badge */
+            .promo-status-badge { 
+                font-size: 0.7rem; 
+                padding: 3px 8px; 
+            }
+            
+            /* 獎勵區 */
+            .reward-item { 
+                padding: 12px; 
+                margin-bottom: 12px; 
+            }
+            
+            .reward-item > div { 
+                font-size: 0.85rem; 
+            }
+            
+            .redeem-btn { 
+                padding: 8px 12px; 
+                font-size: 0.8rem; 
+            }
+            
+            /* 回憶卡片 */
+            .memory-card-realized, 
+            .memory-card-pending, 
+            .memory-card-expired { 
+                padding: 12px; 
+                margin-bottom: 12px; 
+            }
+            
+            .memory-card-realized h3, 
+            .memory-card-pending h3 { 
+                font-size: 0.95rem; 
+                margin: 8px 0 4px 0; 
+            }
+            
+            .memory-date { 
+                font-size: 0.75rem; 
+                margin-bottom: 8px; 
+            }
+            
+            .memory-note { 
+                font-size: 0.8rem; 
+                margin: 8px 0; 
+            }
+            
+            .memory-image { 
+                width: 60px; 
+                height: 60px; 
+            }
+            
+            .add-memory-btn { 
+                padding: 8px 12px; 
+                font-size: 0.75rem; 
+                margin-top: 8px; 
+            }
+            
+            /* 回憶篩選 */
+            .memory-filter-tabs { 
+                gap: 8px; 
+                margin-bottom: 15px; 
+            }
+            
+            .memory-filter-btn { 
+                padding: 8px 15px; 
+                font-size: 0.75rem; 
+            }
+            
+            /* 分類標題 */
+            .memory-section-title { 
+                font-size: 0.95rem; 
+                margin: 20px 0 12px 0; 
+            }
+            
+            /* Info Card */
+            .info-card { 
+                padding: 15px; 
+                margin-bottom: 15px; 
+            }
+            
+            .info-title { 
+                font-size: 1rem; 
+                margin-bottom: 15px; 
+            }
+            
+            .list-item { 
+                font-size: 0.85rem; 
+                padding: 10px 0; 
+            }
+            
+            /* 等級卡片 */
+            .level-card { 
+                padding: 15px; 
+                margin-bottom: 12px; 
+            }
+            
+            /* 優惠狀態 */
+            .promo-card.redeemed { 
+                opacity: 0.5; 
+            }
+            
+            .promo-card.expired { 
+                opacity: 0.5; 
+            }
+            
+            /* 頂部 Header */
+            .action-area { 
+                gap: 5px; 
+                margin-top: 12px; 
+            }
+            
+            .action-input { 
+                width: 60px; 
+                font-size: 0.9rem; 
+                padding: 8px; 
+            }
+            
+            .btn-add, .btn-minus { 
+                padding: 8px 12px; 
+                font-size: 0.8rem; 
+            }
+            
+            /* 特殊效果 */
+            .memory-card-realized::before { 
+                font-size: 1.2rem; 
+            }
+        }
+        
+        /* 平板 (iPad 等) - 寬度 481px - 768px */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .header-card { padding: 35px 18px; }
+            .header-content h1 { font-size: 1.3rem; }
+            
+            .tabs { margin: 12px; gap: 4px; }
+            .tab-btn { font-size: 0.75rem; padding: 9px 4px; }
+            
+            .promo-badge { 
+                font-size: 0.75rem; 
+                padding: 5px 10px;
+                white-space: nowrap;
+            }
+            
+            .promo-card { padding: 14px; margin-bottom: 12px; }
+            .promo-card h3 { font-size: 1rem; margin: 8px 0 4px 0; }
+            .promo-card > p { font-size: 0.85rem; }
+            .promo-time { font-size: 0.8rem; }
+            .promo-rewards li { font-size: 0.85rem; }
+        }
+        
+        /* 桌面 & 大型平板 - 寬度 ≥ 769px */
+        @media (min-width: 769px) {
+            .promo-badge { 
+                font-size: 0.8rem; 
+                padding: 6px 12px;
+            }
+            
+            .promo-card { 
+                padding: 18px; 
+                margin-bottom: 15px; 
+            }
+            
+            .promo-card h3 { 
+                font-size: 1.1rem; 
+                margin: 10px 0 5px 0; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -1348,14 +1588,13 @@
     </script>
 </body>
 </html>
+      
+      
        
         
+
       
-            
-        
-           
-       
-      
-        
+ 
     
-    
+          
+        
